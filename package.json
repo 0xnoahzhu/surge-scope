@@ -1,0 +1,69 @@
+{
+  "name": "surge-scope",
+  "version": "0.2.1",
+  "description": "Surge Scope \u2014 local traffic observability",
+  "main": "dist-electron/electron/main.js",
+  "scripts": {
+    "dev": "npm run build:electron && concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && electron . --dev\"",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit && tsc -p tsconfig.tools.json --noEmit",
+    "build": "npm run typecheck && npm run build:electron && vite build",
+    "start": "electron .",
+    "test": "tsx --test tests/*.test.ts",
+    "db:migrate": "tsx scripts/migrate.ts",
+    "collect": "tsx scripts/collect.ts",
+    "package": "npm run build && electron-builder --mac dmg",
+    "test:smoke": "npm run build && tsx scripts/smoke.ts",
+    "format": "prettier --write electron src scripts tests *.json vite.config.ts index.html"
+  },
+  "keywords": [],
+  "author": "Noah",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "pg": "8.23.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "@types/node": "26.6.5",
+    "@types/pg": "8.23.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "concurrently": "10.0.6",
+    "electron": "45.0.0",
+    "electron-builder": "26.15.3",
+    "prettier": "3.9.10",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "wait-on": "9.5.1"
+  },
+  "private": true,
+  "build": {
+    "appId": "local.noah.surge-scope",
+    "productName": "Surge Scope",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/electron/**",
+      "db/**",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "identity": "-",
+      "extendInfo": {
+        "NSLocalNetworkUsageDescription": "Surge Scope connects to your configured PostgreSQL database on the local network to store and query Surge request data."
+      },
+      "icon": "build/icon.icns"
+    },
+    "afterPack": "dist-electron/scripts/after-pack.js",
+    "artifactName": "Surge-Scope-${version}-mac-${arch}.${ext}"
+  }
+}
